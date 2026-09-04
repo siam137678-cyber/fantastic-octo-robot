@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Siam Video Chat</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101114;color:#fff;font-family:Arial,sans-serif}
+header{padding:18px;text-align:center;background:#191b20;font-size:24px;font-weight:bold}
+.container{max-width:900px;margin:auto;padding:20px}
+.video-area{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.video-box{height:300px;background:#20232a;border-radius:15px;overflow:hidden}
+video{width:100%;height:100%;object-fit:cover}
+.controls{display:flex;justify-content:center;gap:10px;margin:20px 0;flex-wrap:wrap}
+button{border:0;border-radius:10px;padding:13px 18px;background:#2979ff;color:#fff;font-size:16px;cursor:pointer}
+.end{background:#e53935}.chat{background:#191b20;border-radius:15px;padding:15px}
+.messages{height:180px;overflow-y:auto;background:#101114;border-radius:10px;padding:10px;margin:10px 0}
+.message{background:#2979ff;padding:9px;border-radius:10px;margin-bottom:8px;width:max-content;max-width:80%}
+.input-area{display:flex;gap:8px}input{flex:1;padding:14px;border:0;border-radius:10px;outline:none}
+@media(max-width:600px){.video-area{grid-template-columns:1fr}.video-box{height:220px}}
+</style>
+</head>
+<body>
+<header>📹 Siam Video Chat</header>
+<div class="container">
+<div class="video-area">
+<div class="video-box"><video id="localVideo" autoplay muted playsinline></video></div>
+<div class="video-box"><video id="remoteVideo" autoplay playsinline></video></div>
+</div>
+<div class="controls">
+<button onclick="startCamera()">🎥 Camera</button>
+<button onclick="toggleMic()">🎙️ Mic</button>
+<button class="end" onclick="endCall()">📞 End Call</button>
+</div>
+<div class="chat">
+<h2>💬 Chat</h2>
+<div id="messages" class="messages"></div>
+<div class="input-area">
+<input id="messageInput" type="text" placeholder="মেসেজ লিখুন...">
+<button onclick="sendMessage()">Send</button>
+</div>
+</div>
+</div>
+<script>
+let stream=null,micOn=true;
+async function startCamera(){
+ try{
+  stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+  document.getElementById("localVideo").srcObject=stream;
+ }catch(e){alert("Camera/Microphone permission পাওয়া যায়নি।");}
+}
+function toggleMic(){
+ if(!stream)return;
+ micOn=!micOn;
+ stream.getAudioTracks().forEach(t=>t.enabled=micOn);
+}
+function endCall(){
+ if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}
+ document.getElementById("localVideo").srcObject=null;
+}
+function sendMessage(){
+ const input=document.getElementById("messageInput"),text=input.value.trim();
+ if(!text)return;
+ const m=document.createElement("div");
+ m.className="message";m.textContent=text;
+ document.getElementById("messages").appendChild(m);
+ input.value="";
+}
+document.getElementById("messageInput").addEventListener("keypress",e=>{
+ if(e.key==="Enter")sendMessage();
+});
+</script>
+</body>
+</html>
